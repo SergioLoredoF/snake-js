@@ -22,12 +22,19 @@ main {
     background-color: var(--snake);
 }
 
+.snake-body {
+    background-image: linear-gradient(-45deg, #000000 25%, transparent 25%, transparent 50%, #000000 50%, #000000 75%, transparent 75%, transparent);
+  background-size: 20px 20px;
+}
+
 .snake-head {
     background-color: var(--snake-head);
 }
 
 .food {
-    background-color: var(--food);
+    background-image: url('./food.webp');
+    background-size: contain;
+    background-repeat: no-repeat;
 }
 
 .wall {
@@ -51,4 +58,9 @@ main {
 .mensaje {
     color: aliceblue;
     font-size: 6rem;
+}
+
+.puntaje {
+    color: aliceblue;
+    font-size: 4rem;
 }

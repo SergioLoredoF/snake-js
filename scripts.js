@@ -7,20 +7,23 @@ let footCord =  [(Math.floor(Math.random() * (20 - 2 + 1)) + 2), (Math.floor(Mat
 console.warn("FoodCordInit: ", footCord)
 
 let direction = 'right'
+let newDirection = 'right';
 
 let wropeUp = false
 
 let initVelocity = 1000;
 
+//si apretas arriba abajo es el pex
+
 //listener de teclas asigna direccion
 document.addEventListener('keydown', function(event) {
-    const newDirection = {
-        ArrowUp:    direction != 'down'  ? 'up'   : 'down',
-        ArrowDown:  direction != 'up'    ? 'down' : 'up',
-        ArrowLeft:  direction != 'right' ? 'left' : 'right',
-        ArrowRight: direction != 'left'  ? 'right': 'left'
+    const directionPush = {
+        w:  direction != 'down'  ? 'up'   : 'down',
+        s:  direction != 'up'    ? 'down' : 'up',
+        a:  direction != 'right' ? 'left' : 'right',
+        d:  direction != 'left'  ? 'right': 'left'
     }
-    direction = newDirection[event.key]
+    newDirection = directionPush[event.key]
   });
 
 const newFoodCords = () => {
@@ -29,6 +32,12 @@ const newFoodCords = () => {
 }
 
 const calMoveHead = () => {
+    //comprobar direccion
+    if(direction === 'down'  && newDirection != 'up' )   direction = newDirection
+    if(direction === 'up'    && newDirection != 'down')  direction = newDirection
+    if(direction === 'right' && newDirection != 'left')  direction = newDirection
+    if(direction === 'left'  && newDirection != 'right') direction = newDirection
+
     const move = {
         right : [(snake.head[0] + 1), snake.head[1]],
         left  : [(snake.head[0] - 1), snake.head[1]],
@@ -75,24 +84,40 @@ const eatFoodValidate = async () => {
         wropeUp = true
 
         //Aumentamos la velocidad
-        if(snake.body.length % 3 === 0){
-            clearTimeout(interval);
-            initVelocity = (initVelocity - 100)
-            if (initVelocity >= 200 ){
+        if(snake.body.length % 2 === 0 && initVelocity > 50){
+            clearInterval(interval);
+            
+            if (initVelocity > 400 ){
+                initVelocity = (initVelocity - 300)
+                console.warn("Velocidad: ", initVelocity)
                 interval = setInterval(() => {
                     //mueve snake y comprueba si come
                     moveSnake();
                     eatFoodValidate();
                     validateDie();
                     printScreen();
-                    console.log("Body: ", snake)
-                    console.log("WropUp", wropeUp)
+                }, initVelocity);
+            } else if( initVelocity > 100) {
+                initVelocity = (initVelocity - 50)
+                console.warn("Velocidad: ", initVelocity)
+                interval = setInterval(() => {
+                    //mueve snake y comprueba si come
+                    moveSnake();
+                    eatFoodValidate();
+                    validateDie();
+                    printScreen();
+                }, initVelocity);
+            }else {
+                console.warn("Velocidad: ", initVelocity)
+                interval = setInterval(() => {
+                    //mueve snake y comprueba si come
+                    moveSnake();
+                    eatFoodValidate();
+                    validateDie();
+                    printScreen();
                 }, initVelocity);
             }
-            
         }
-        
-
     } 
 
 
@@ -103,25 +128,30 @@ const validateDie = () => {
     //valida que cabeza no toque la periferia del tablero
     if(snake.head[0] === 1){
         document.getElementById("muerte").style.visibility = "visible";
-        clearTimeout(interval);
+        document.getElementById("puntaje").innerHTML = `Puntaje: ${snake.body.length}`
+        clearInterval(interval);
     }
     if(snake.head[0] === 21){
         document.getElementById("muerte").style.visibility = "visible";
-        clearTimeout(interval);
+        document.getElementById("puntaje").innerHTML = `Puntaje: ${snake.body.length}`
+        clearInterval(interval);
     }
     if(snake.head[1] === 1){
         document.getElementById("muerte").style.visibility = "visible";
-        clearTimeout(interval);
+        document.getElementById("puntaje").innerHTML = `Puntaje: ${snake.body.length}`
+        clearInterval(interval);
     }
     if(snake.head[1] === 13){
         document.getElementById("muerte").style.visibility = "visible";
-        clearTimeout(interval);
+        document.getElementById("puntaje").innerHTML = `Puntaje: ${snake.body.length}`
+        clearInterval(interval);
     }
 
     snake.body.forEach(item =>{
         if(item.toString() === snake.head.toString()){
             document.getElementById("muerte").style.visibility = "visible";
-            clearTimeout(interval);
+            document.getElementById("puntaje").innerHTML = `Puntaje: ${snake.body.length}`
+            clearInterval(interval);
         }
     })
 
@@ -130,9 +160,14 @@ const validateDie = () => {
 const printScreen = () => {
     //pinta cuerpo de la serpiente
     document.getElementById("escene").innerHTML = 
-    `<div class="snake snake-head" style="grid-column-start: ${snake.head[0]}; grid-row-start: ${snake.head[1]};" />`
+    `<div class="snake snake-head" style="grid-column-start: ${snake.head[0]}; grid-row-start: ${snake.head[1]}; border-radius:${
+        direction === 'right' ? '0 30px 30px 0' :
+        direction === 'left'  ? '30px 0 0 30px' :
+        direction === 'up'    ? '30px 30px 0 0' :
+        direction === 'down'  ? '0 0 30px 30px' : ''
+    } ;" />`
 
-    snake.body.forEach(item => {
+    snake.body.forEach((item, index) => {
         document.getElementById("escene").innerHTML += 
             `<div class="snake snake-body" style="grid-column-start: ${item[0]}; grid-row-start: ${item[1]};" />`
     })
@@ -160,8 +195,6 @@ let interval = setInterval(() => {
     eatFoodValidate();
     validateDie();
     printScreen();
-    console.log("Body: ", snake)
-    console.log("WropUp", wropeUp)
 }, initVelocity);
 
 
@@ -180,6 +213,7 @@ const gameAgain = () => {
     direction = 'right'
     
     wropeUp = false
+    initVelocity = 1000
    
     interval = setInterval(() => {
         //mueve snake y comprueba si come
@@ -187,7 +221,5 @@ const gameAgain = () => {
         eatFoodValidate();
         validateDie();
         printScreen();
-        console.log("Body: ", snake)
-        console.log("WropUp", wropeUp)
-    }, 1000);
+    }, initVelocity);
 }
