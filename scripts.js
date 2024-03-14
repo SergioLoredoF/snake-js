@@ -23,7 +23,7 @@ document.addEventListener('keydown', function(event) {
         a:  direction != 'right' ? 'left' : 'right',
         d:  direction != 'left'  ? 'right': 'left'
     }
-    newDirection = directionPush[event.key]
+    newDirection = directionPush[event.key] ? directionPush[event.key] : direction
   });
 
 const newFoodCords = () => {
